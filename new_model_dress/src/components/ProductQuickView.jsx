@@ -4,7 +4,10 @@ import { useCart } from '../context/CartContext';
 
 export default function ProductQuickView({ product, isOpen, onClose }) {
   const { addToCart } = useCart();
-  const [selectedImage, setSelectedImage] = useState(product?.image || '');
+  
+  const getMainImage = (p) => p?.image || p?.defaultImage || p?.colors?.[0]?.image || '';
+
+  const [selectedImage, setSelectedImage] = useState(getMainImage(product));
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -12,9 +15,9 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
 
   useEffect(() => {
     if (product) {
-      setSelectedImage(product.image);
-      setSelectedSize(product.sizes[0] || 'M');
-      setSelectedColor(product.colors[0]?.name || '');
+      setSelectedImage(getMainImage(product));
+      setSelectedSize(product.sizes?.[0] || 'M');
+      setSelectedColor(product.colors?.[0]?.name || '');
       setQuantity(1);
       setIsSuccess(false);
     }
@@ -22,10 +25,21 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
 
   if (!isOpen || !product) return null;
 
-  const allImages = [product.image, ...(product.additionalImages || [])];
+  const colorImages = (product.colors || []).map((c) => c.image).filter(Boolean);
+  const allImages = Array.from(
+    new Set([getMainImage(product), ...colorImages, ...(product.additionalImages || [])].filter(Boolean))
+  );
 
   const handleAddToCart = () => {
-    addToCart(product, selectedSize, selectedColor, quantity);
+    addToCart(
+      {
+        ...product,
+        image: selectedImage || getMainImage(product),
+      },
+      selectedSize,
+      selectedColor,
+      quantity
+    );
     setIsSuccess(true);
     setTimeout(() => {
       setIsSuccess(false);
@@ -132,7 +146,10 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
                   {product.colors.map((c) => (
                     <button
                       key={c.name}
-                      onClick={() => setSelectedColor(c.name)}
+                      onClick={() => {
+                        setSelectedColor(c.name);
+                        if (c.image) setSelectedImage(c.image);
+                      }}
                       className={`w-7 h-7 rounded-full border-2 transition-all p-0.5 ${
                         selectedColor === c.name
                           ? 'border-neutral-900 dark:border-white scale-110'
