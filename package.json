@@ -1,0 +1,8 @@
+{
+  "name": "new-dres-shop-root",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix new_model_dress run build",
+    "dev": "npm --prefix new_model_dress run dev"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm --prefix new_model_dress run build",
+  "outputDirectory": "new_model_dress/dist",
+  "installCommand": "npm --prefix new_model_dress install",
+  "framework": "vite"
+}
